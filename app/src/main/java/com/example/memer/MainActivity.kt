@@ -8,15 +8,13 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
+import com.android.volley.toolbox.JsonObjectRequest
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.example.memer.databinding.ActivityMainBinding
-import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
 
@@ -47,21 +45,21 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        val queue = Volley.newRequestQueue(this)
+      //  val queue = Volley.newRequestQueue(this)
 
 
 
-        val stringRequest = StringRequest(
-            Request.Method.GET, url,
+        val jsonObjectRequest = JsonObjectRequest(
+            Request.Method.GET, url,null,
             { response ->
                 Log.e("Responce", "getMemeData: "+response.toString())
 
-                val responseObject=JSONObject(response)
+                //val responseObject=JSONObject(response)
 
-                binding.memeTitle.text=responseObject.getString("title")
-                binding.memeAuthor.text=responseObject.getString("author")
+                binding.memeTitle.text=response.getString("title")
+                binding.memeAuthor.text=response.getString("author")
                 //binding.imageView.
-                Glide.with(this).load( responseObject.get("url"))
+                Glide.with(this).load( response.get("url"))
                     .listener(object :RequestListener<Drawable>{
                         override fun onLoadFailed(
                             e: GlideException?,
@@ -94,7 +92,8 @@ class MainActivity : AppCompatActivity() {
             })
 
 
-        queue.add(stringRequest)
+      // queue.add(stringRequest)
+        MySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest)
     }
 
     fun sharememe() {
