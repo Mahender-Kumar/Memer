@@ -1,17 +1,20 @@
-@file:Suppress("DEPRECATION")
-
 package com.example.memer
 
-import android.app.ProgressDialog
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.example.memer.databinding.ActivityMainBinding
 import org.json.JSONObject
 
@@ -36,10 +39,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getMemeData() {
-
-        val progressDialog=ProgressDialog(this)
-        progressDialog.setMessage("Please wait ..|.")
-        progressDialog.show()
+          binding.progressBar.visibility=View.VISIBLE
+//        val progressDialog=ProgressDialog(this)
+//        progressDialog.setMessage("Please wait ..|.")
+//        progressDialog.show()
 
 
 
@@ -58,12 +61,35 @@ class MainActivity : AppCompatActivity() {
                 binding.memeTitle.text=responseObject.getString("title")
                 binding.memeAuthor.text=responseObject.getString("author")
                 //binding.imageView.
-                Glide.with(this).load( responseObject.get("url")).into(binding.imageView)
-                progressDialog.dismiss()
+                Glide.with(this).load( responseObject.get("url"))
+                    .listener(object :RequestListener<Drawable>{
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable>?,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            binding.progressBar.visibility=View.GONE
+                            return false
+                        }
+
+                        override fun onResourceReady(
+                            resource: Drawable?,
+                            model: Any?,
+                            target: Target<Drawable>?,
+                            dataSource: DataSource?,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            binding.progressBar.visibility=View.GONE
+                            return false
+                        }
+                    })
+                    .into(binding.imageView)
+       //         progressDialog.dismiss()
             },
             {
                 error->
-                progressDialog.dismiss()
+       //         progressDialog.dismiss()
                     Toast.makeText(this@MainActivity, error.localizedMessage,Toast.LENGTH_SHORT).show()
             })
 
@@ -73,6 +99,7 @@ class MainActivity : AppCompatActivity() {
 
     fun sharememe() {
         val intent= Intent(Intent.ACTION_SEND)
+        intent.type="text/plain"
         intent.putExtra(Intent.EXTRA_TEXT,"check this out ..|. $url")
         val chooser=Intent.createChooser(intent, "share this using ....")
         startActivity(chooser)
